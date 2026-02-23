@@ -35,8 +35,11 @@ exports.remove = async (req, res) => {
 
     const post = await Post.getById(id);
     if (post.rows[0]?.gambar) {
-        const filePath = path.join(__dirname, '../uploads', post.rows[0].gambar);
-        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+        // PERBAIKAN: Cari file di public/images untuk dihapus
+        const filePath = path.join(__dirname, '../public/images', post.rows[0].gambar);
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
     }
 
     await Post.remove(id);

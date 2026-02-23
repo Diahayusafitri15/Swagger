@@ -9,31 +9,36 @@ const userRoutes = require('./routes/user_route');
 const swaggerDocument = require('./utils/swagger');
 const postRoutes = require('./routes/post_route');
 
-
 const app = express();
-const PORT = 3000;
+// PERBAIKAN: Gunakan variabel dari .env agar lebih dinamis
+const PORT = process.env.PORT || 3000; 
 
 app.use(express.json());
 
-// Upload folder
-if (!fs.existsSync('uploads')) {
-    fs.mkdirSync('uploads');
+// PERBAIKAN: Pastikan folder 'public/images' tersedia otomatis
+const uploadPath = path.join(__dirname, 'public/images');
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
 }
 
+// Konfigurasi Multer
 const storage = multer.diskStorage({
-    destination: 'uploads/',
+    destination: (req, file, cb) => {
+      cb(null, 'public/images/'); // Sudah sesuai permintaan pembimbing
+    },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + '-' + file.originalname);
+      cb(null, Date.now() + '-' + file.originalname);
     }
 });
 
-app.use('/uploads', express.static('uploads'));
+// Akses statis folder gambar
+app.use('/images', express.static('public/images'));
 
 // Routes
 app.use('/', userRoutes);
 app.use('/', postRoutes);
 
-// Swagger (kalau mau dipisah nanti bisa)
+// Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.listen(PORT, () => {
