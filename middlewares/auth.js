@@ -1,28 +1,26 @@
 const jwt = require('jsonwebtoken');
 
-const authenticateToken = (req, res, next) => {
+module.exports = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+    const token = authHeader && authHeader.split(' ')[1]; // Mengambil token setelah 'Bearer '
 
     if (!token) {
-        return res.status(401).json({
-            status: 'error',
-            message: 'Akses ditolak, token tidak ditemukan'
+        return res.status(401).json({ 
+            status: "error",
+            message: "Token diperlukan! Silakan klik Authorize di Swagger." 
         });
     }
 
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
-        if (err) {
-            return res.status(403).json({
-                status: 'error',
-                message: 'Token tidak valid atau sudah kadaluarsa'
-            });
-        }
-
-        // data user dari token
-        req.user = user;
+    try {
+        // HARUS pakai ACCESS_TOKEN_SECRET agar sinkron dengan Login
+        const verified = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        req.user = verified;
         next();
-    });
+    } catch (err) {
+        // Error 403 muncul di sini jika token basi atau secret salah
+        return res.status(403).json({ 
+            status: "error", 
+            message: "Token tidak valid atau sudah kadaluarsa. Silakan Login ulang." 
+        });
+    }
 };
-
-module.exports = authenticateToken;

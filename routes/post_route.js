@@ -1,26 +1,34 @@
 const express = require('express');
 const router = express.Router();
 const postController = require('../controllers/post_controller');
-const authenticateToken = require('../middlewares/auth');
-const multer = require('multer');
+const upload = require('../middlewares/upload'); // Sesuai folder 'middlewares'
+const auth = require('../middlewares/auth');
+const { body } = require('express-validator');
 
-// PERBAIKAN: Konfigurasi Multer agar menyimpan ke public/images
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, 'public/images/'); // Jangan pakai 'uploads/' lagi
-    },
-    filename: (req, file, cb) => {
-      cb(null, Date.now() + '-' + file.originalname);
-    }
-});
+const postValidation = [
+    body('judul').notEmpty().withMessage('Judul wajib diisi').trim(),
+    body('isi').notEmpty().withMessage('Isi wajib diisi').trim(),
+    body('category_id').isNumeric().withMessage('Kategori harus berupa angka ID')
+];
 
-const upload = multer({ storage: storage });
+router.get('/', postController.getAll);
+router.get('/:id', postController.getById); // Tanpa regex agar tidak PathError
 
-// Routes dengan Middleware Auth
-router.get('/posts', postController.getAll);
-router.get('/posts/:id', postController.getById);
-router.post('/posts', authenticateToken, upload.single('gambar'), postController.create);
-router.put('/posts/:id', authenticateToken, upload.single('gambar'), postController.update);
-router.delete('/posts/:id', authenticateToken, postController.remove);
+// Struktur yang BENAR:
+router.post('/', 
+  auth, // <--- Harus di urutan pertama setelah path
+  upload.single('gambar'), 
+  postValidation, 
+  postController.create
+);
+
+router.put('/:id', 
+    auth, 
+    upload.single('gambar'), 
+    postValidation, 
+    postController.update
+);
+
+router.delete('/:id', auth, postController.remove);
 
 module.exports = router;

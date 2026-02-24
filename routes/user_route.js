@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const controller = require('../controllers/user_controller');
+const userController = require('../controllers/user_controller');
 
-router.post('/register', controller.register);
-router.post('/login', controller.login);
-router.post('/refresh-token', controller.refreshToken);
+// Pastikan memanggil handler yang benar
+router.post('/login', userController.login);
+router.post('/refresh-token', userController.refresh);
 
 module.exports = router;

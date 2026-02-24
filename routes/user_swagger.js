@@ -1,9 +1,9 @@
-const userSwagger = {
+module.exports = {
     paths: {
-        '/register': {
+        '/users/register': {
             post: {
                 tags: ['Authentication'],
-                summary: 'Registrasi user baru',
+                summary: 'Daftar akun baru',
                 security: [],
                 requestBody: {
                     required: true,
@@ -11,24 +11,22 @@ const userSwagger = {
                         'application/json': {
                             schema: {
                                 type: 'object',
+                                required: ['email', 'password'],
                                 properties: {
-                                    email: { type: 'string', example: 'user@email.com' },
-                                    password: { type: 'string', example: 'password123' }
+                                    email: { type: 'string', example: 'moci@gmail.com' },
+                                    password: { type: 'string', example: '123' }
                                 }
                             }
                         }
                     }
                 },
-                responses: {
-                    201: { description: 'User berhasil dibuat' }
-                }
+                responses: { 201: { description: 'Berhasil daftar' } }
             }
         },
-
-        '/login': {
+        '/users/login': {
             post: {
                 tags: ['Authentication'],
-                summary: 'Login user',
+                summary: 'Masuk ke sistem',
                 security: [],
                 requestBody: {
                     required: true,
@@ -36,44 +34,39 @@ const userSwagger = {
                         'application/json': {
                             schema: {
                                 type: 'object',
+                                required: ['email', 'password'],
                                 properties: {
-                                    email: { type: 'string' },
-                                    password: { type: 'string' }
+                                    email: { type: 'string', example: 'moci@gmail.com' },
+                                    password: { type: 'string', example: '123' }
                                 }
                             }
                         }
                     }
                 },
-                responses: {
-                    200: { description: 'Login berhasil' }
-                }
+                responses: { 200: { description: 'Berhasil login' } }
             }
         },
-
-        '/refresh-token': {
+        '/users/refresh-token': {
             post: {
                 tags: ['Authentication'],
-                summary: 'Refresh access token',
-                security: [],
+                summary: 'Perbarui access token',
+                security: [], // Pastikan di route backend, endpoint ini TIDAK dipasang middleware auth
                 requestBody: {
                     required: true,
                     content: {
                         'application/json': {
                             schema: {
                                 type: 'object',
+                                required: ['refreshToken'],
                                 properties: {
-                                    token: { type: 'string' }
+                                    refreshToken: { type: 'string' }
                                 }
                             }
                         }
                     }
                 },
-                responses: {
-                    200: { description: 'Token diperbarui' }
-                }
+                responses: { 200: { description: 'Token diperbarui' } }
             }
         }
     }
 };
-
-module.exports = userSwagger;
