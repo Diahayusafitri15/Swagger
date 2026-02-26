@@ -2,10 +2,20 @@ const Post = require('../models/post');
 const response = require('../utils/response');
 const { validationResult } = require('express-validator');
 
+// Ambil Base URL dari .env untuk menggabungkan path gambar
+const baseUrl = process.env.MINIO_BASE_URL;
+
 exports.getAll = async (req, res) => {
     try {
         const data = await Post.getAll();
-        response.success(res, data.rows);
+        
+        // Map data agar kolom gambar berisi URL lengkap
+        const formattedData = data.rows.map(item => ({
+            ...item,
+            gambar: item.gambar ? `${baseUrl}/${item.gambar}` : null
+        }));
+        
+        response.success(res, formattedData);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -18,7 +28,12 @@ exports.getById = async (req, res) => {
     try {
         const data = await Post.getById(id);
         if (!data.rows[0]) return res.status(404).json({ message: "Data tidak ditemukan" });
-        response.success(res, data.rows[0]);
+        
+        // Gabungkan path dari DB dengan Base URL
+        const item = data.rows[0];
+        if (item.gambar) item.gambar = `${baseUrl}/${item.gambar}`;
+
+        response.success(res, item);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -30,18 +45,22 @@ exports.create = async (req, res) => {
         return res.status(400).json({ errors: errors.array() });
     }
 
-    // Pastikan req.file.minioUrl ada (hasil dari middleware uploadToMinio)
-    if (!req.file || !req.file.minioUrl) {
+    // Gunakan req.file.minioPath hasil perbaikan middleware sebelumnya
+    if (!req.file || !req.file.minioPath) {
         return res.status(400).json({ message: "Gambar wajib diunggah" });
     }
 
     const { judul, isi, category_id } = req.body;
-    const gambar = req.file.minioUrl; 
+    const gambar = req.file.minioPath; // Hanya simpan path: "my-bucket/nama.webp"
 
     try {
         const data = await Post.create(judul, isi, gambar, category_id);
-        // Pesan disesuaikan
-        response.success(res, data.rows[0], 'Post berhasil dibuat. Gambar otomatis diubah ke WebP dan disimpan di MinIO');
+        
+        // Kembalikan data dengan URL lengkap untuk respon Swagger
+        const result = data.rows[0];
+        result.gambar = `${baseUrl}/${result.gambar}`;
+
+        response.success(res, result, 'Post berhasil dibuat. Path disimpan di DB, domain di .env');
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
@@ -64,9 +83,9 @@ exports.update = async (req, res) => {
 
         let gambar = oldPost.rows[0].gambar;
         
-        // Jika ada upload baru, otomatis akan pakai URL WebP yang baru
-        if (req.file && req.file.minioUrl) {
-            gambar = req.file.minioUrl;
+        // Jika ada upload baru, ambil minioPath yang baru
+        if (req.file && req.file.minioPath) {
+            gambar = req.file.minioPath;
         }
 
         await Post.update(id, judul, isi, gambar, category_id);
