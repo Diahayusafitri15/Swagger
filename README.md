@@ -17,3 +17,32 @@ Sistem RESTful API untuk manajemen postingan dengan fitur autentikasi JWT dan Up
 
 ## Endpoint Dokumentasi
 Buka `http://localhost:3000/api-docs` setelah server berjalan.
+
+# 🚀 Backend PKL - Post Management System
+
+Sistem manajemen postingan sederhana yang sudah terintegrasi dengan **MinIO Object Storage** dan optimasi gambar otomatis.
+
+## 🌟 Fitur Utama
+* **Image Optimization**: Menggunakan `Sharp` untuk mengonversi setiap upload gambar menjadi format `.webp` secara otomatis guna menghemat ruang penyimpanan.
+* **Cloud Storage**: Terintegrasi dengan **MinIO** (S3 Compatible) untuk manajemen file yang lebih skalabel dan aman.
+* **Environment Configuration**: Penggunaan file `.env` untuk keamanan kredensial database dan storage.
+* **Relational Database**: Menggunakan PostgreSQL untuk penyimpanan data yang terstruktur.
+
+## 🛠️ Tech Stack
+- **Runtime**: Node.js
+- **Framework**: Express.js
+- **Database**: PostgreSQL
+- **Storage**: MinIO
+- **Image Processing**: Sharp
+
+## 📋 Prasyarat
+Sebelum menjalankan, pastikan Anda memiliki:
+- Node.js terinstall
+- PostgreSQL berjalan
+- MinIO server aktif (Port 9000 & 9001)
+
+## 🚀 Cara Menjalankan
+1. Clone repository
+2. Install dependencies:
+   ```bash
+   npm install
